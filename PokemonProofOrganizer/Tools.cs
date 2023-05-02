@@ -17,10 +17,12 @@ namespace PokemonProofOrganizer
             compress = compressChecked;
         }
 
-        public void runTools(string[] filePaths, int ternary)
+        public void runTools(string[] filePaths, int ternary, string fileContent)
         {
             int currentNumber = ternary;
             string fileName = "";
+            string newfilePath = "";
+            string directoryPath = "";
 
             foreach (string filePath in filePaths)
             {
@@ -28,15 +30,51 @@ namespace PokemonProofOrganizer
 
                 if (rename)
                 {
-                    renameFiles(filePath, fileName + ".mp4");
+                    newfilePath = renameFiles(filePath, fileName + ".mp4");
                 }
-                
+
+                if (createFolder)
+                {
+                    directoryPath = createFolderAndMove(newfilePath);
+                }
+
+                if (addTradeHistory)
+                {
+                    createTradeHistory(fileContent, directoryPath);
+                }
 
                 ternary++;
             }
         }
 
-        private void renameFiles(string filePath, string newFileName)
+        private void createTradeHistory(string fileContent, string targetDirectory)
+        {
+            string fileName = "Trade History.txt";
+
+            using (StreamWriter writer = new StreamWriter(fileName))
+            {
+                writer.Write(fileContent);
+            }
+
+            // Move the file to the new directory
+            string newFilePath = Path.Combine(targetDirectory, fileName);
+            File.Move(fileName, newFilePath);
+        }
+
+        private string createFolderAndMove(string filePath)
+        {
+            string directoryPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+                string newFilePath = Path.Combine(directoryPath, Path.GetFileName(filePath));
+                File.Move(filePath, newFilePath);
+            }
+
+            return directoryPath;
+        }
+
+        private string renameFiles(string filePath, string newFileName)
         {
             string directoryName = Path.GetDirectoryName(filePath);
 
@@ -45,6 +83,8 @@ namespace PokemonProofOrganizer
 
             // Rename the file
             File.Move(filePath, newFilePath);
+
+            return newFilePath;
         }
 
         private static int DecimalToTernary(int decimalNumber)

@@ -16,6 +16,7 @@
         <CheckBox Name="CreateFolder" Content="Create Folder" HorizontalAlignment="Left" Margin="70,272,0,0" VerticalAlignment="Top" Checked="CreateFolderChecked" Unchecked="CreateFolderUnchecked"/>
         <CheckBox Name="AddTradeHistory" Content="Add Trade History" HorizontalAlignment="Left" Margin="70,292,0,0" VerticalAlignment="Top" Checked="AddTradeHistoryChecked" Unchecked="AddTradeHistoryUnchecked"/>
         <CheckBox Name="Compress" Content="Compress" HorizontalAlignment="Left" Margin="70,312,0,0" VerticalAlignment="Top" Checked="CompressChecked" Unchecked="CompressUnchecked"/>
+        <Button Content="Edit Trade History" HorizontalAlignment="Left" Margin="202,292,0,0" VerticalAlignment="Top" Width="120" Click="EditTradeHistory"/>
 
     </Grid>
 </Window>

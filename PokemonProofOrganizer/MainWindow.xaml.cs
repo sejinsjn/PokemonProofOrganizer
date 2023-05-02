@@ -28,6 +28,7 @@ namespace PokemonProofOrganizer
         private static bool compressChecked = false;
         private static string[] filePaths = null;
         private static int ternary = 0;
+        private static string tradeHistory = "";
 
         public MainWindow()
         {
@@ -105,7 +106,24 @@ namespace PokemonProofOrganizer
         private void Start_Click(object sender, RoutedEventArgs e)
         {
             Tools tools = new Tools(renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
-            tools.runTools(filePaths, ternary);
+            tools.runTools(filePaths, ternary, tradeHistory);
+        }
+
+        private void EditTradeHistory(object sender, RoutedEventArgs e)
+        {
+            FlowDocument document = new FlowDocument();
+            Paragraph paragraph = new Paragraph(new Run(tradeHistory));
+            document.Blocks.Add(paragraph);
+
+            TradeHistory th = new TradeHistory(document);
+            th.Show();
+            // Subscribe to the Closed event of the new window
+            th.Closed += (sender, args) =>
+            {
+                // Retrieve data from the new window
+                tradeHistory = th.Content;
+            };
+            
         }
     }
 }
