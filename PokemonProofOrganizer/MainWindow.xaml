@@ -1,0 +1,21 @@
+﻿<Window x:Class="PokemonProofOrganizer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PokemonProofOrganizer"
+        mc:Ignorable="d"
+        Title="Pokemon Proof Organizer" Height="450" Width="800">
+    <Grid Margin="0,0,0,-6">
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="565,89,0,0" VerticalAlignment="Top" Width="121" Click="BrowseFiles"/>
+        <TextBox Name="Path" HorizontalAlignment="Left" Margin="70,89,0,0" TextWrapping="NoWrap" Text="Path" VerticalAlignment="Top" Width="384" TextChanged="PathAdded" Height="20"/>
+        <TextBox Name="TernaryNumber" HorizontalAlignment="Left" Margin="202,184,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged"/>
+        <Label Content="Start Ternary Number" HorizontalAlignment="Left" Margin="70,180,0,0" VerticalAlignment="Top" Width="127"/>
+        <Button Name="Start" Content="Start" HorizontalAlignment="Left" Margin="565,357,0,0" VerticalAlignment="Top" Width="121" Click="Start_Click"/>
+        <CheckBox Name="Rename" Content="Rename" HorizontalAlignment="Left" Margin="70,252,0,0" VerticalAlignment="Top" Checked="RenameChecked"  Unchecked="RenameUnchecked"/>
+        <CheckBox Name="CreateFolder" Content="Create Folder" HorizontalAlignment="Left" Margin="70,272,0,0" VerticalAlignment="Top" Checked="CreateFolderChecked" Unchecked="CreateFolderUnchecked"/>
+        <CheckBox Name="AddTradeHistory" Content="Add Trade History" HorizontalAlignment="Left" Margin="70,292,0,0" VerticalAlignment="Top" Checked="AddTradeHistoryChecked" Unchecked="AddTradeHistoryUnchecked"/>
+        <CheckBox Name="Compress" Content="Compress" HorizontalAlignment="Left" Margin="70,312,0,0" VerticalAlignment="Top" Checked="CompressChecked" Unchecked="CompressUnchecked"/>
+
+    </Grid>
+</Window>
