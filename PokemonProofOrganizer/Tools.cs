@@ -1,23 +1,26 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System;
+using System.IO;
+using System.Collections.Generic;
 
 namespace PokemonProofOrganizer
 {
     internal class Tools
     {
         private static bool rename = false;
-        private static bool createFolder = false;
+        private static bool create = false;
         private static bool addTradeHistory = false;
         private static bool compress = false;
 
         public Tools(bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked)
         {
             rename = renameChecked;
-            createFolder = createFolderChecked;
+            create = createFolderChecked;
             addTradeHistory = addTradeHistoryChecked;
             compress = compressChecked;
         }
 
-        public void runTools(string[] filePaths, int ternary, string fileContent)
+        public void runTools(List<string> filePaths, int ternary, string fileContent)
         {
             int currentNumber = ternary;
             string fileName = "";
@@ -26,25 +29,66 @@ namespace PokemonProofOrganizer
 
             foreach (string filePath in filePaths)
             {
-                fileName = "" + (12 * 10000 + DecimalToTernary(ternary));
+                fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
 
-                if (rename)
+                if (compress)
                 {
-                    newfilePath = renameFiles(filePath, fileName + ".mp4");
+                    if (rename)
+                    {
+                        newfilePath = renameFiles(filePath, fileName);
+                    }
+
+                    directoryPath = createFolder(newfilePath);
+                    compressProof(newfilePath, directoryPath + @"\" + fileName, "Fast 720p30");
+
+                    if (addTradeHistory)
+                    {
+                        Debug.WriteLine("hi");
+                        createTradeHistory(fileContent, directoryPath);
+                    }
                 }
-
-                if (createFolder)
+                else
                 {
-                    directoryPath = createFolderAndMove(newfilePath);
-                }
+                    if (rename)
+                    {
+                        newfilePath = renameFiles(filePath, fileName);
+                    }
 
-                if (addTradeHistory)
-                {
-                    createTradeHistory(fileContent, directoryPath);
+                    if (create)
+                    {
+                        directoryPath = createFolderAndMove(newfilePath);
+                    }
+
+                    if (addTradeHistory)
+                    {
+                        Debug.WriteLine("hi");
+                        createTradeHistory(fileContent, directoryPath);
+                    }
                 }
 
                 ternary++;
             }
+        }
+
+        private void compressProof(string inputPath, string outputPath, string presetName)
+        {
+            // Set the path to the HandbrakeCLI executable
+            //string handbrakePath = @"C:\Users\sedad\source\repos\PokemonProofOrganizer\PokemonProofOrganizer\HandbrakeCLI\HandBrakeCLI.exe";
+            //ffmpeg:
+            string arguments = $"ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
+            // Build the HandbrakeCLI arguments
+            //string arguments = $"--preset-import-file \"{presetName}.json\" -Z \"{presetName}\" -i \"{inputPath}\" -o \"{outputPath}\"";
+            //string arguments = $"-i \"{inputPath}\" -o \"{outputPath}\" --preset-import-file \"{presetName}.json\" --preset \"{presetName}\"";
+
+            Process process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = "cmd.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.CreateNoWindow = true;
+            startInfo.Arguments = $"/C ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
+            process.StartInfo = startInfo;
+            process.Start();
+
         }
 
         private void createTradeHistory(string fileContent, string targetDirectory)
@@ -59,6 +103,17 @@ namespace PokemonProofOrganizer
             // Move the file to the new directory
             string newFilePath = Path.Combine(targetDirectory, fileName);
             File.Move(fileName, newFilePath);
+        }
+
+        private string createFolder(string filePath)
+        {
+            string directoryPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            return directoryPath;
         }
 
         private string createFolderAndMove(string filePath)

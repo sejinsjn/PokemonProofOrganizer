@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,7 @@ namespace PokemonProofOrganizer
         private static bool createFolderChecked = false;
         private static bool addTradeHistoryChecked = false;
         private static bool compressChecked = false;
-        private static string[] filePaths = null;
+        List<string> filePaths = new List<string>();
         private static int ternary = 0;
         private static string tradeHistory = "";
 
@@ -50,7 +51,8 @@ namespace PokemonProofOrganizer
             if (result == true)
             {
                 // Open document
-                filePaths = dlg.FileNames;
+                filePaths = dlg.FileNames.ToList();
+                Path.Text = filePaths[0];
             }
         }
 
@@ -96,7 +98,7 @@ namespace PokemonProofOrganizer
 
         private void PathAdded(object sender, TextChangedEventArgs e)
         {
-
+            
         }
         private void TernaryNumberChanged(object sender, TextChangedEventArgs e)
         {
@@ -105,8 +107,26 @@ namespace PokemonProofOrganizer
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            Tools tools = new Tools(renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
-            tools.runTools(filePaths, ternary, tradeHistory);
+            if (filePaths != null && filePaths.Count > 0)
+            {
+                if (renameChecked || createFolderChecked || addTradeHistoryChecked)
+                {
+                    Tools tools = new Tools(renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
+                    tools.runTools(filePaths, ternary, tradeHistory);
+                    MessageBox.Show("Finished!");
+                    filePaths = new List<string>();
+                }
+                else
+                {
+                    MessageBox.Show("Select one at least one of the options!");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Select one or more files!");
+            }
+            
+            
         }
 
         private void EditTradeHistory(object sender, RoutedEventArgs e)

@@ -8,7 +8,7 @@
         Title="Pokemon Proof Organizer" Height="450" Width="800">
     <Grid Margin="0,0,0,-6">
         <Button Content="Browse" HorizontalAlignment="Left" Margin="565,89,0,0" VerticalAlignment="Top" Width="121" Click="BrowseFiles"/>
-        <TextBox Name="Path" HorizontalAlignment="Left" Margin="70,89,0,0" TextWrapping="NoWrap" Text="Path" VerticalAlignment="Top" Width="384" TextChanged="PathAdded" Height="20"/>
+        <TextBox Name="Path" HorizontalAlignment="Left" Margin="70,89,0,0" TextWrapping="NoWrap" Text="Select one or more files" VerticalAlignment="Top" Width="384" TextChanged="PathAdded" Height="20"/>
         <TextBox Name="TernaryNumber" HorizontalAlignment="Left" Margin="202,184,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged"/>
         <Label Content="Start Ternary Number" HorizontalAlignment="Left" Margin="70,180,0,0" VerticalAlignment="Top" Width="127"/>
         <Button Name="Start" Content="Start" HorizontalAlignment="Left" Margin="565,357,0,0" VerticalAlignment="Top" Width="121" Click="Start_Click"/>
