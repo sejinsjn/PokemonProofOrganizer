@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace PokemonProofOrganizer
 {
@@ -54,31 +55,31 @@ namespace PokemonProofOrganizer
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
-                    if (create)
+                    if (newfilePath != "")
                     {
-                        directoryPath = createFolderAndMove(newfilePath);
-                    }
+                        if (create)
+                        {
+                            directoryPath = createFolderAndMove(newfilePath);
+                        }
 
-                    if (addTradeHistory)
+                        if (addTradeHistory)
+                        {
+                            Debug.WriteLine("hi");
+                            createTradeHistory(fileContent, directoryPath);
+                        }
+                    }
+                    else
                     {
-                        Debug.WriteLine("hi");
-                        createTradeHistory(fileContent, directoryPath);
+                        MessageBox.Show("File already exists");
                     }
                 }
-
                 ternary++;
             }
         }
 
         private void compressProof(string inputPath, string outputPath, string presetName)
         {
-            // Set the path to the HandbrakeCLI executable
-            //string handbrakePath = @"C:\Users\sedad\source\repos\PokemonProofOrganizer\PokemonProofOrganizer\HandbrakeCLI\HandBrakeCLI.exe";
-            //ffmpeg:
             string arguments = $"ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
-            // Build the HandbrakeCLI arguments
-            //string arguments = $"--preset-import-file \"{presetName}.json\" -Z \"{presetName}\" -i \"{inputPath}\" -o \"{outputPath}\"";
-            //string arguments = $"-i \"{inputPath}\" -o \"{outputPath}\" --preset-import-file \"{presetName}.json\" --preset \"{presetName}\"";
 
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -88,6 +89,11 @@ namespace PokemonProofOrganizer
             startInfo.Arguments = $"/C ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
             process.StartInfo = startInfo;
             process.Start();
+
+            
+
+            // Wait for the process to exit
+            process.WaitForExit();
 
         }
 
@@ -136,8 +142,15 @@ namespace PokemonProofOrganizer
             // Construct the new file path by combining the directory and the new file name
             string newFilePath = Path.Combine(directoryName, newFileName);
 
-            // Rename the file
-            File.Move(filePath, newFilePath);
+            if (!File.Exists(newFilePath))
+            {
+                // Rename the file
+                File.Move(filePath, newFilePath);
+            }
+            else
+            {
+                return "";
+            }
 
             return newFilePath;
         }

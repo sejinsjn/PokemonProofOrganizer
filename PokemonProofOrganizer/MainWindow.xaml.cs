@@ -102,7 +102,12 @@ namespace PokemonProofOrganizer
         }
         private void TernaryNumberChanged(object sender, TextChangedEventArgs e)
         {
-            ternary = int.Parse(TernaryNumber.Text);
+            int value;
+            bool isNumeric = int.TryParse(TernaryNumber.Text, out value);
+            if (isNumeric && value > -1)
+            {
+                ternary = value;
+            }
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)

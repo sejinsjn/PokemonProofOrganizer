@@ -21,7 +21,7 @@ namespace PokemonProofOrganizer
     /// </summary>
     public partial class TradeHistory : Window
     {
-        public string Content { get; set; }
+        public new string Content { get; set; }
         private FlowDocument _document;
 
         public TradeHistory(FlowDocument document)
