@@ -39,7 +39,15 @@ namespace PokemonProofOrganizer
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
-                    directoryPath = createFolder(newfilePath);
+                    if (newfilePath == "")
+                    {
+                        directoryPath = createFolder(Path.GetDirectoryName(filePath), "output");
+                    }
+                    else
+                    {
+                        directoryPath = createFolder(Path.GetDirectoryName(filePath), fileName);
+                    }
+                    
                     compressProof(newfilePath, directoryPath + @"\" + fileName, "Fast 720p30");
 
                     if (addTradeHistory)
@@ -111,9 +119,9 @@ namespace PokemonProofOrganizer
             File.Move(fileName, newFilePath);
         }
 
-        private string createFolder(string filePath)
+        private string createFolder(string dirPath, string folderName)
         {
-            string directoryPath = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath));
+            string directoryPath = Path.Combine(dirPath, folderName);
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
