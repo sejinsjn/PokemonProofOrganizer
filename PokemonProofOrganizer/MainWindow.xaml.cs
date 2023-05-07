@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,11 +24,12 @@ namespace PokemonProofOrganizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<string> filePaths = new List<string>();
+        ManualResetEvent resetEvent = new ManualResetEvent(false);
         private static bool renameChecked = false;
         private static bool createFolderChecked = false;
         private static bool addTradeHistoryChecked = false;
         private static bool compressChecked = false;
-        List<string> filePaths = new List<string>();
         private static int ternary = 0;
         private static string tradeHistory = "";
 
@@ -114,10 +116,13 @@ namespace PokemonProofOrganizer
         {
             if (filePaths != null && filePaths.Count > 0)
             {
-                if (renameChecked || createFolderChecked || addTradeHistoryChecked)
+                if (renameChecked || createFolderChecked || addTradeHistoryChecked || compressChecked)
                 {
                     Tools tools = new Tools(renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
-                    tools.runTools(filePaths, ternary, tradeHistory);
+
+                    Thread ffmpegThread = new Thread(() => tools.runTools(filePaths, ternary, tradeHistory, resetEvent));
+                    
+                    ffmpegThread.Start();
                     MessageBox.Show("Finished!");
                     filePaths = new List<string>();
                 }
@@ -149,6 +154,11 @@ namespace PokemonProofOrganizer
                 tradeHistory = th.Content;
             };
             
+        }
+
+        private void CancelAll_Click(object sender, RoutedEventArgs e)
+        {
+            resetEvent.Set();
         }
     }
 }

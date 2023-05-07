@@ -17,6 +17,7 @@
         <CheckBox Name="AddTradeHistory" Content="Add Trade History" HorizontalAlignment="Left" Margin="70,292,0,0" VerticalAlignment="Top" Checked="AddTradeHistoryChecked" Unchecked="AddTradeHistoryUnchecked"/>
         <CheckBox Name="Compress" Content="Compress" HorizontalAlignment="Left" Margin="70,312,0,0" VerticalAlignment="Top" Checked="CompressChecked" Unchecked="CompressUnchecked"/>
         <Button Content="Edit Trade History" HorizontalAlignment="Left" Margin="202,292,0,0" VerticalAlignment="Top" Width="120" Click="EditTradeHistory"/>
+        <Button Name="CancelAll"  Content="CancelAll" HorizontalAlignment="Left" Margin="439,357,0,0" VerticalAlignment="Top" Width="121" Click="CancelAll_Click"/>
 
     </Grid>
 </Window>

@@ -3,6 +3,10 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Threading;
+using System.Management;
+using System.Security.Cryptography;
+using System.CodeDom;
 
 namespace PokemonProofOrganizer
 {
@@ -21,38 +25,43 @@ namespace PokemonProofOrganizer
             compress = compressChecked;
         }
 
-        public void runTools(List<string> filePaths, int ternary, string fileContent)
+        public void runTools(List<string> filePaths, int ternary, string fileContent, ManualResetEvent resetEvent)
         {
             int currentNumber = ternary;
             string fileName = "";
             string newfilePath = "";
             string directoryPath = "";
 
+
             foreach (string filePath in filePaths)
             {
-                fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
+                fileName = Path.GetFileName(filePath);
+                newfilePath = filePath;
 
                 if (compress)
                 {
                     if (rename)
                     {
+                        fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
-                    if (newfilePath == "")
+                    if (!create)
                     {
                         directoryPath = createFolder(Path.GetDirectoryName(filePath), "output");
                     }
                     else
                     {
-                        directoryPath = createFolder(Path.GetDirectoryName(filePath), fileName);
+                        directoryPath = createFolder(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(fileName));
                     }
                     
-                    compressProof(newfilePath, directoryPath + @"\" + fileName, "Fast 720p30");
+                    if (!compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent))
+                    {
+                        break;
+                    }
 
                     if (addTradeHistory)
                     {
-                        Debug.WriteLine("hi");
                         createTradeHistory(fileContent, directoryPath);
                     }
                 }
@@ -60,6 +69,7 @@ namespace PokemonProofOrganizer
                 {
                     if (rename)
                     {
+                        fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
@@ -85,24 +95,42 @@ namespace PokemonProofOrganizer
             }
         }
 
-        private void compressProof(string inputPath, string outputPath, string presetName)
+        private bool compressProof(string inputPath, string outputPath, ManualResetEvent resetEvent)
         {
-            string arguments = $"ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
-
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "cmd.exe";
+            startInfo.FileName = "ffmpeg.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.CreateNoWindow = true;
-            startInfo.Arguments = $"/C ffmpeg -i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
+            startInfo.Arguments = $"-i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
+            startInfo.RedirectStandardError = true;
             process.StartInfo = startInfo;
             process.Start();
 
-            
+            while (!process.StandardError.EndOfStream)
+            {
+                if (resetEvent.WaitOne(0))
+                {
+                    ProcessStartInfo killProcess = new ProcessStartInfo();
+                    killProcess.FileName = "cmd.exe";
+                    killProcess.Arguments = "/C taskkill /f /t /im ffmpeg.exe /im choco.exe";
+                    killProcess.WindowStyle = ProcessWindowStyle.Hidden;
+                    killProcess.CreateNoWindow = true;
+
+                    Process.Start(killProcess);
+
+                    resetEvent.Reset();
+
+                    return false;
+                }
+                var line = process.StandardError.ReadLine();
+                Debug.WriteLine(line);
+            }
 
             // Wait for the process to exit
             process.WaitForExit();
 
+            return true;
         }
 
         private void createTradeHistory(string fileContent, string targetDirectory)
