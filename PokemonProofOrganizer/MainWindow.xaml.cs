@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,8 +26,10 @@ namespace PokemonProofOrganizer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private BlockingCollection<string> queue;
         List<string> filePaths = new List<string>();
         ManualResetEvent resetEvent = new ManualResetEvent(false);
+        private ManualResetEvent threadStartedEvent = new ManualResetEvent(false);
         private static bool renameChecked = false;
         private static bool createFolderChecked = false;
         private static bool addTradeHistoryChecked = false;
@@ -36,6 +40,7 @@ namespace PokemonProofOrganizer
         public MainWindow()
         {
             InitializeComponent();
+            queue = new BlockingCollection<string>();
         }
 
         private void BrowseFiles(object sender, RoutedEventArgs e)
@@ -53,8 +58,11 @@ namespace PokemonProofOrganizer
             if (result == true)
             {
                 // Open document
-                filePaths = dlg.FileNames.ToList();
-                Path.Text = filePaths[0];
+                foreach (string item in dlg.FileNames)
+                {
+                    queue.Add(item);
+                }
+                Path.Text = dlg.FileNames[0];
             }
         }
 
@@ -114,16 +122,17 @@ namespace PokemonProofOrganizer
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            if (filePaths != null && filePaths.Count > 0)
+            if (queue != null && queue.Count > 0)
             {
                 if (renameChecked || createFolderChecked || addTradeHistoryChecked || compressChecked)
                 {
-                    Tools tools = new Tools(renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
+                    Tools tools = new Tools(queue, renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
 
-                    Thread ffmpegThread = new Thread(() => tools.runTools(filePaths, ternary, tradeHistory, resetEvent));
-                    
-                    ffmpegThread.Start();
-                    MessageBox.Show("Finished!");
+                    Thread thread = new Thread(() => tools.runTools(filePaths, ternary, tradeHistory, resetEvent, threadStartedEvent));
+
+                    thread.Start();
+
+                    queue = new BlockingCollection<string>();
                     filePaths = new List<string>();
                 }
                 else
@@ -135,8 +144,12 @@ namespace PokemonProofOrganizer
             {
                 MessageBox.Show("Select one or more files!");
             }
-            
-            
+        }
+
+        private void ToolsThreadFinished(object sender, EventArgs e)
+        {
+            // Show message box when thread finishes
+            MessageBox.Show("Finished!");
         }
 
         private void EditTradeHistory(object sender, RoutedEventArgs e)

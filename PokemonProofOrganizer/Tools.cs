@@ -7,33 +7,39 @@ using System.Threading;
 using System.Management;
 using System.Security.Cryptography;
 using System.CodeDom;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace PokemonProofOrganizer
 {
     internal class Tools
     {
+        private BlockingCollection<string> queue;
+
         private static bool rename = false;
         private static bool create = false;
         private static bool addTradeHistory = false;
         private static bool compress = false;
+        private static bool compressSuccess = true;
 
-        public Tools(bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked)
+        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked)
         {
+            this.queue = queue;
             rename = renameChecked;
             create = createFolderChecked;
             addTradeHistory = addTradeHistoryChecked;
             compress = compressChecked;
         }
 
-        public void runTools(List<string> filePaths, int ternary, string fileContent, ManualResetEvent resetEvent)
+        public void runTools(List<string> filePaths, int ternary, string fileContent, ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
         {
             int currentNumber = ternary;
             string fileName = "";
             string newfilePath = "";
             string directoryPath = "";
 
-
-            foreach (string filePath in filePaths)
+            
+            foreach (string filePath in queue.GetConsumingEnumerable())
             {
                 fileName = Path.GetFileName(filePath);
                 newfilePath = filePath;
@@ -54,8 +60,10 @@ namespace PokemonProofOrganizer
                     {
                         directoryPath = createFolder(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(fileName));
                     }
-                    
-                    if (!compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent))
+
+                compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent);
+
+                    if (!compressSuccess)
                     {
                         break;
                     }
@@ -93,10 +101,13 @@ namespace PokemonProofOrganizer
                 }
                 ternary++;
             }
+
+            compressSuccess = true;
         }
 
-        private bool compressProof(string inputPath, string outputPath, ManualResetEvent resetEvent)
+        private void compressProof(string inputPath, string outputPath, ManualResetEvent resetEvent)
         {
+            
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "ffmpeg.exe";
@@ -120,8 +131,7 @@ namespace PokemonProofOrganizer
                     Process.Start(killProcess);
 
                     resetEvent.Reset();
-
-                    return false;
+                    compressSuccess = false;
                 }
                 var line = process.StandardError.ReadLine();
                 Debug.WriteLine(line);
@@ -129,8 +139,11 @@ namespace PokemonProofOrganizer
 
             // Wait for the process to exit
             process.WaitForExit();
+        }
 
-            return true;
+        private void ProcessExited(object sender, EventArgs e)
+        {
+            MessageBox.Show("Finished!");
         }
 
         private void createTradeHistory(string fileContent, string targetDirectory)
