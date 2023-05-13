@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.CodeDom;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace PokemonProofOrganizer
 {
@@ -117,6 +118,7 @@ namespace PokemonProofOrganizer
             startInfo.RedirectStandardError = true;
             process.StartInfo = startInfo;
             process.Start();
+            TimeSpan duration = TimeSpan.Parse("00:00:00.00"), time = TimeSpan.Parse("00:00:00.00");
 
             while (!process.StandardError.EndOfStream)
             {
@@ -134,7 +136,39 @@ namespace PokemonProofOrganizer
                     compressSuccess = false;
                 }
                 var line = process.StandardError.ReadLine();
-                Debug.WriteLine(line);
+                
+                if (line.StartsWith("  Duration:"))
+                {
+                    Match matchD = Regex.Match(line, @"Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})");
+
+                    if (matchD.Success)
+                    {
+                        duration = new TimeSpan(0, Convert.ToInt32(matchD.Groups[1].Value),
+                                                            Convert.ToInt32(matchD.Groups[2].Value),
+                                                            Convert.ToInt32(matchD.Groups[3].Value),
+                                                            Convert.ToInt32(matchD.Groups[4].Value) * 10);
+                        Debug.WriteLine(duration.TotalSeconds);
+                    }
+                }
+                if (line.StartsWith("frame"))
+                {
+                    Match match = Regex.Match(line, @"time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})");
+
+                    if (match.Success)
+                    {
+                        time = new TimeSpan(0, Convert.ToInt32(match.Groups[1].Value),
+                                                            Convert.ToInt32(match.Groups[2].Value),
+                                                            Convert.ToInt32(match.Groups[3].Value),
+                                                            Convert.ToInt32(match.Groups[4].Value) * 10);
+                    }
+                }
+                if (duration.TotalSeconds != 0 || time.TotalSeconds != 0)
+                {
+                    double ratio = time.TotalSeconds / duration.TotalSeconds;
+                    double percentage = ratio * 100;
+
+                    Debug.WriteLine(percentage.ToString("F2") + "%");
+                }
             }
 
             // Wait for the process to exit

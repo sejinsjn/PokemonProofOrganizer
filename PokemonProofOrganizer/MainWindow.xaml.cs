@@ -48,8 +48,9 @@ namespace PokemonProofOrganizer
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.FileName = "Document"; // Default file name
             dlg.DefaultExt = ".mp4"; // Default file extension
-            dlg.Filter = "Videos |*.mp4"; // Filter files by extension
+            dlg.Filter = "Videos (*.mp4, *.mov, *.m4v)|*.mp4;*.mov;*.m4v"; // Filter files by extension
             dlg.Multiselect = true; //Select multiple files
+
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
