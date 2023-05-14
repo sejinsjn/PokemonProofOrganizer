@@ -59,10 +59,7 @@ namespace PokemonProofOrganizer
             if (result == true)
             {
                 // Open document
-                foreach (string item in dlg.FileNames)
-                {
-                    queue.Add(item);
-                }
+                filePaths = dlg.FileNames.ToList();
                 Path.Text = dlg.FileNames[0];
             }
         }
@@ -170,6 +167,19 @@ namespace PokemonProofOrganizer
         private void CancelAll_Click(object sender, RoutedEventArgs e)
         {
             resetEvent.Set();
+        }
+
+        private void AddToQueueClick(object sender, RoutedEventArgs e)
+        {
+            foreach (string item in filePaths)
+            {
+                queue.Add(item);
+            }
+        }
+
+        private void ViewQueue(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
