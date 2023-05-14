@@ -10,6 +10,7 @@ using System.CodeDom;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace PokemonProofOrganizer
 {
@@ -22,19 +23,21 @@ namespace PokemonProofOrganizer
         private static bool addTradeHistory = false;
         private static bool compress = false;
         private static bool compressSuccess = true;
+        private MainWindow mainWindow;
 
-        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked)
+        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked, MainWindow mainWindow)
         {
             this.queue = queue;
             rename = renameChecked;
             create = createFolderChecked;
             addTradeHistory = addTradeHistoryChecked;
             compress = compressChecked;
+            this.mainWindow = mainWindow;
         }
 
         public void runTools(List<string> filePaths, int ternary, string fileContent, ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
         {
-            int currentNumber = ternary;
+            int currentNumber = ternary, fileCounter = 0, queueCount = queue.Count;
             string fileName = "";
             string newfilePath = "";
             string directoryPath = "";
@@ -47,6 +50,13 @@ namespace PokemonProofOrganizer
 
                 if (compress)
                 {
+                    fileCounter++;
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        mainWindow.Files.Content = $"File: {fileCounter}/{queueCount}";
+                    });
+
                     if (rename)
                     {
                         fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
@@ -62,7 +72,7 @@ namespace PokemonProofOrganizer
                         directoryPath = createFolder(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(fileName));
                     }
 
-                compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent);
+                    compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent);
 
                     if (!compressSuccess)
                     {
@@ -116,6 +126,8 @@ namespace PokemonProofOrganizer
             startInfo.CreateNoWindow = true;
             startInfo.Arguments = $"-i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
             startInfo.RedirectStandardError = true;
+            process.EnableRaisingEvents = true;
+            process.Exited += new EventHandler(ProcessExited);
             process.StartInfo = startInfo;
             process.Start();
             TimeSpan duration = TimeSpan.Parse("00:00:00.00"), time = TimeSpan.Parse("00:00:00.00");
@@ -167,6 +179,14 @@ namespace PokemonProofOrganizer
                     double ratio = time.TotalSeconds / duration.TotalSeconds;
                     double percentage = ratio * 100;
 
+
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        mainWindow.progressBar.Value = Math.Round(percentage, 2); ;
+                        mainWindow.progressLabel.Content = $"{percentage.ToString("F2")}%";
+                    });
+                    
+
                     Debug.WriteLine(percentage.ToString("F2") + "%");
                 }
             }
@@ -177,7 +197,15 @@ namespace PokemonProofOrganizer
 
         private void ProcessExited(object sender, EventArgs e)
         {
-            MessageBox.Show("Finished!");
+            if (queue.Count == 0)
+            {
+                MessageBox.Show("Compressing finished!");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    mainWindow.progressBar.Value = 0;
+                    mainWindow.progressLabel.Content = $"0%";
+                });
+            }
         }
 
         private void createTradeHistory(string fileContent, string targetDirectory)

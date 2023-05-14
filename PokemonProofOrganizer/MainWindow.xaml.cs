@@ -127,7 +127,7 @@ namespace PokemonProofOrganizer
             {
                 if (renameChecked || createFolderChecked || addTradeHistoryChecked || compressChecked)
                 {
-                    Tools tools = new Tools(queue, renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked);
+                    Tools tools = new Tools(queue, renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked, this);
 
                     Thread thread = new Thread(() => tools.runTools(filePaths, ternary, tradeHistory, resetEvent, threadStartedEvent));
 
@@ -135,6 +135,8 @@ namespace PokemonProofOrganizer
 
                     queue = new BlockingCollection<string>();
                     filePaths = new List<string>();
+                    progressBar.Value = 0;
+                    progressLabel.Content = "0.00%";
                 }
                 else
                 {
