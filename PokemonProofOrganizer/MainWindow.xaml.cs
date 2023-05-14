@@ -120,23 +120,24 @@ namespace PokemonProofOrganizer
                 ternary = value;
             }
         }
-
-        private void Start_Click(object sender, RoutedEventArgs e)
+        private async void Start_Click(object sender, RoutedEventArgs e)
         {
             if (queue != null && queue.Count > 0)
             {
                 if (renameChecked || createFolderChecked || addTradeHistoryChecked || compressChecked)
                 {
+                    Start.IsEnabled = false;
+                    string prefix = Prefix.Text;
                     Tools tools = new Tools(queue, renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked, this);
 
-                    Thread thread = new Thread(() => tools.runTools(filePaths, ternary, tradeHistory, resetEvent, threadStartedEvent));
-
-                    thread.Start();
+                    await Task.Run(() => tools.runTools(filePaths, prefix, ternary, tradeHistory, resetEvent, threadStartedEvent));
 
                     queue = new BlockingCollection<string>();
                     filePaths = new List<string>();
                     progressBar.Value = 0;
                     progressLabel.Content = "0.00%";
+                    Files.Content = $"File: 0/0";
+                    Start.IsEnabled = true;
                 }
                 else
                 {
@@ -147,12 +148,6 @@ namespace PokemonProofOrganizer
             {
                 MessageBox.Show("Select one or more files!");
             }
-        }
-
-        private void ToolsThreadFinished(object sender, EventArgs e)
-        {
-            // Show message box when thread finishes
-            MessageBox.Show("Finished!");
         }
 
         private void EditTradeHistory(object sender, RoutedEventArgs e)

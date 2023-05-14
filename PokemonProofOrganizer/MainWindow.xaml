@@ -5,24 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PokemonProofOrganizer"
         mc:Ignorable="d"
-        Title="Pokemon Proof Organizer" Height="450" Width="800">
-    <Grid Margin="0,0,0,-6">
-        <Button Content="Browse" HorizontalAlignment="Left" Margin="565,89,0,0" VerticalAlignment="Top" Width="121" Click="BrowseFiles"/>
-        <TextBox Name="Path" HorizontalAlignment="Left" Margin="70,89,0,0" TextWrapping="NoWrap" Text="Select one or more files" VerticalAlignment="Top" Width="384" TextChanged="PathAdded" Height="20"/>
-        <TextBox Name="TernaryNumber" HorizontalAlignment="Left" Margin="202,184,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged"/>
-        <Label Content="Start Ternary Number" HorizontalAlignment="Left" Margin="70,180,0,0" VerticalAlignment="Top" Width="127"/>
+        Title="Pokemon Proof Organizer" Height="400" Width="640">
+    <Grid Margin="0,0,0,4" HorizontalAlignment="Center" Width="630">
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="395,64,0,0" VerticalAlignment="Top" Width="160" Click="BrowseFiles"/>
+        <TextBox Name="Path" HorizontalAlignment="Left" Margin="55,64,0,0" TextWrapping="NoWrap" Text="Select one or more files" VerticalAlignment="Top" Width="260" TextChanged="PathAdded" Height="20"/>
+        <TextBox Name="TernaryNumber" HorizontalAlignment="Left" Margin="195,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged" Height="20" RenderTransformOrigin="0.333,0.502" TextAlignment="Right"/>
+        <Label Content="Start Ternary Number" HorizontalAlignment="Left" Margin="55,98,0,0" VerticalAlignment="Top" Width="140"/>
 
-        <CheckBox Name="Rename" Content="Rename" HorizontalAlignment="Left" Margin="70,252,0,0" VerticalAlignment="Top" Checked="RenameChecked"  Unchecked="RenameUnchecked"/>
-        <CheckBox Name="CreateFolder" Content="Create Folder" HorizontalAlignment="Left" Margin="70,272,0,0" VerticalAlignment="Top" Checked="CreateFolderChecked" Unchecked="CreateFolderUnchecked"/>
-        <CheckBox Name="AddTradeHistory" Content="Add Trade History" HorizontalAlignment="Left" Margin="70,292,0,0" VerticalAlignment="Top" Checked="AddTradeHistoryChecked" Unchecked="AddTradeHistoryUnchecked"/>
-        <CheckBox Name="Compress" Content="Compress" HorizontalAlignment="Left" Margin="70,312,0,0" VerticalAlignment="Top" Checked="CompressChecked" Unchecked="CompressUnchecked"/>
-        <Button Content="Edit Trade History" HorizontalAlignment="Left" Margin="202,292,0,0" VerticalAlignment="Top" Width="120" Click="EditTradeHistory"/>
-        <Button Name="CancelAll"  Content="CancelAll" HorizontalAlignment="Left" Margin="439,340,0,0" VerticalAlignment="Top" Width="121" Click="CancelAll_Click"/>
-        <Button Name="Start" Content="Start" HorizontalAlignment="Left" Margin="565,340,0,0" VerticalAlignment="Top" Width="121" Click="Start_Click"/>
-        <Label Name="Files" Content="File: 0/0" VerticalAlignment="Top" Margin="439,370,240,0"/>
-        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="565,370,0,23">
-            <ProgressBar x:Name="progressBar" Height="20" Width="121" Minimum="0" Maximum="100" Margin="0,3,0,3"/>
-            <Label x:Name="progressLabel" Content="0%" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <CheckBox Name="Rename" Content="Rename" HorizontalAlignment="Left" Margin="55,184,0,0" VerticalAlignment="Top" Checked="RenameChecked"  Unchecked="RenameUnchecked" Height="20" Width="120" RenderTransformOrigin="0.375,0.502"/>
+        <CheckBox Name="CreateFolder" Content="Create Folder" HorizontalAlignment="Left" Margin="55,204,0,0" VerticalAlignment="Top" Checked="CreateFolderChecked" Unchecked="CreateFolderUnchecked" Height="20" Width="120"/>
+        <CheckBox Name="AddTradeHistory" Content="Add Trade History" HorizontalAlignment="Left" Margin="55,224,0,0" VerticalAlignment="Top" Checked="AddTradeHistoryChecked" Unchecked="AddTradeHistoryUnchecked" Height="20" Width="120"/>
+        <CheckBox Name="Compress" Content="Compress" HorizontalAlignment="Left" Margin="55,244,0,0" VerticalAlignment="Top" Checked="CompressChecked" Unchecked="CompressUnchecked" Height="20" Width="120"/>
+        <Button Content="Edit Trade History" HorizontalAlignment="Left" Margin="195,224,0,0" VerticalAlignment="Top" Width="120" Click="EditTradeHistory"/>
+        <Button Name="CancelAll"  Content="CancelAll" HorizontalAlignment="Left" Margin="335,264,0,0" VerticalAlignment="Top" Width="100" Click="CancelAll_Click"/>
+        <Button Name="Start" Content="Start" HorizontalAlignment="Left" Margin="455,264,0,0" VerticalAlignment="Top" Width="100" Click="Start_Click"/>
+        <Label Name="Files" Content="File: 0/0" VerticalAlignment="Top" Margin="335,299,195,0"/>
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="457,302,0,0">
+            <ProgressBar x:Name="progressBar" Height="20" Width="100" Minimum="0" Maximum="100" Margin="-1,2,1,4"/>
+            <Label x:Name="progressLabel" Content="0%" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-3,0,0"/>
         </Grid>
+        <Label Content="Prefix" HorizontalAlignment="Left" Margin="55,138,0,0" VerticalAlignment="Top" Width="140"/>
+        <TextBox x:Name="Prefix" Text="12" HorizontalAlignment="Left" Margin="195,144,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged" Height="20" BorderThickness="1,1,1,1" TextAlignment="Right"/>
     </Grid>
 </Window>

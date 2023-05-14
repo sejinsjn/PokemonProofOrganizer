@@ -11,21 +11,22 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Windows.Documents;
 
 namespace PokemonProofOrganizer
 {
     internal class Tools
     {
         private BlockingCollection<string> queue;
-
         private static bool rename = false;
         private static bool create = false;
         private static bool addTradeHistory = false;
         private static bool compress = false;
-        private static bool compressSuccess = true;
+        private static bool compressSuccess = false;
         private MainWindow mainWindow;
 
-        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, bool compressChecked, MainWindow mainWindow)
+        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, 
+            bool compressChecked, MainWindow mainWindow)
         {
             this.queue = queue;
             rename = renameChecked;
@@ -35,14 +36,14 @@ namespace PokemonProofOrganizer
             this.mainWindow = mainWindow;
         }
 
-        public void runTools(List<string> filePaths, int ternary, string fileContent, ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
+        public void runTools(List<string> filePaths, string prefix, int ternary, string fileContent, ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
         {
             int currentNumber = ternary, fileCounter = 0, queueCount = queue.Count;
             string fileName = "";
             string newfilePath = "";
             string directoryPath = "";
 
-            
+
             foreach (string filePath in queue.GetConsumingEnumerable())
             {
                 fileName = Path.GetFileName(filePath);
@@ -59,7 +60,7 @@ namespace PokemonProofOrganizer
 
                     if (rename)
                     {
-                        fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
+                        fileName = $"{prefix}{DecimalToTernary(ternary).ToString().PadLeft(4, '0')}.mp4";
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
@@ -71,6 +72,8 @@ namespace PokemonProofOrganizer
                     {
                         directoryPath = createFolder(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(fileName));
                     }
+
+                    compressSuccess = true;
 
                     compressProof(newfilePath, directoryPath + @"\" + fileName, resetEvent);
 
@@ -88,7 +91,7 @@ namespace PokemonProofOrganizer
                 {
                     if (rename)
                     {
-                        fileName = "" + (12 * 10000 + DecimalToTernary(ternary)) + ".mp4";
+                        fileName = $"{prefix}{DecimalToTernary(ternary).ToString().PadLeft(4, '0')}.mp4";
                         newfilePath = renameFiles(filePath, fileName);
                     }
 
@@ -111,9 +114,12 @@ namespace PokemonProofOrganizer
                     }
                 }
                 ternary++;
+                if(queue.Count == 0)
+                {
+                    MessageBox.Show("Queue finished!");
+                    break;
+                }
             }
-
-            compressSuccess = true;
         }
 
         private void compressProof(string inputPath, string outputPath, ManualResetEvent resetEvent)
@@ -126,8 +132,6 @@ namespace PokemonProofOrganizer
             startInfo.CreateNoWindow = true;
             startInfo.Arguments = $"-i \"{inputPath}\" -c:v libx265 -an -x265-params crf=25 \"{outputPath}\"";
             startInfo.RedirectStandardError = true;
-            process.EnableRaisingEvents = true;
-            process.Exited += new EventHandler(ProcessExited);
             process.StartInfo = startInfo;
             process.Start();
             TimeSpan duration = TimeSpan.Parse("00:00:00.00"), time = TimeSpan.Parse("00:00:00.00");
@@ -136,6 +140,10 @@ namespace PokemonProofOrganizer
             {
                 if (resetEvent.WaitOne(0))
                 {
+                    MessageBox.Show("Canceled!");
+                    resetEvent.Reset();
+                    compressSuccess = false;
+
                     ProcessStartInfo killProcess = new ProcessStartInfo();
                     killProcess.FileName = "cmd.exe";
                     killProcess.Arguments = "/C taskkill /f /t /im ffmpeg.exe /im choco.exe";
@@ -143,9 +151,6 @@ namespace PokemonProofOrganizer
                     killProcess.CreateNoWindow = true;
 
                     Process.Start(killProcess);
-
-                    resetEvent.Reset();
-                    compressSuccess = false;
                 }
                 var line = process.StandardError.ReadLine();
                 
@@ -193,19 +198,6 @@ namespace PokemonProofOrganizer
 
             // Wait for the process to exit
             process.WaitForExit();
-        }
-
-        private void ProcessExited(object sender, EventArgs e)
-        {
-            if (queue.Count == 0)
-            {
-                MessageBox.Show("Compressing finished!");
-                System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                {
-                    mainWindow.progressBar.Value = 0;
-                    mainWindow.progressLabel.Content = $"0%";
-                });
-            }
         }
 
         private void createTradeHistory(string fileContent, string targetDirectory)
