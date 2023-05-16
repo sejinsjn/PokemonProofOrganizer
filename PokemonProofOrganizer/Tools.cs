@@ -33,15 +33,15 @@ namespace PokemonProofOrganizer
                 fileName = Path.GetFileName(job.FilePath);
                 newfilePath = job.FilePath;
 
+                fileCounter++;
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    mainWindow.Files.Content = $"File: {fileCounter}/{queueCount}";
+                });
+
                 if (job.Options.Compress)
                 {
-                    fileCounter++;
-
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        mainWindow.Files.Content = $"File: {fileCounter}/{queueCount}";
-                    });
-
                     if (job.Options.Rename)
                     {
                         fileName = $"{job.Prefix}{DecimalToTernary(job.Ternary).ToString().PadLeft(4, '0')}.mp4";

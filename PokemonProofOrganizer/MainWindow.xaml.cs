@@ -162,10 +162,12 @@ namespace PokemonProofOrganizer
         {
             foreach (string path in filePaths)
             {
-                Job job = new Job(path, options, tradeHistory, ternary, Prefix.Text);
+                Options newOption = new Options(options.Rename, options.CreateFolder, options.AddTradeHistory, options.Compress);
+                Job job = new Job(path, newOption, tradeHistory, ternary, Prefix.Text);
                 queue.Add(job);
                 ternary++;
             }
+            Files.Content = $"File: 0/{queue.Count}";
         }
     }
 }
