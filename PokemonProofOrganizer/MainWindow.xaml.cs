@@ -1,23 +1,12 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PokemonProofOrganizer
 {
@@ -26,21 +15,23 @@ namespace PokemonProofOrganizer
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BlockingCollection<string> queue;
-        List<string> filePaths = new List<string>();
-        ManualResetEvent resetEvent = new ManualResetEvent(false);
+        private BlockingCollection<Job> queue;
+        private List<string> filePaths;
+        private ManualResetEvent resetEvent;
         private ManualResetEvent threadStartedEvent = new ManualResetEvent(false);
-        private static bool renameChecked = false;
-        private static bool createFolderChecked = false;
-        private static bool addTradeHistoryChecked = false;
-        private static bool compressChecked = false;
-        private static int ternary = 0;
-        private static string tradeHistory = "";
+        private Options options;
+        private int ternary;
+        private string tradeHistory;
 
         public MainWindow()
         {
             InitializeComponent();
-            queue = new BlockingCollection<string>();
+            queue = new BlockingCollection<Job>();
+            filePaths = new List<string>();
+            resetEvent = new ManualResetEvent(false);
+            options = new Options(false, false, false, false);
+            ternary = 0;
+            tradeHistory = "";
         }
 
         private void BrowseFiles(object sender, RoutedEventArgs e)
@@ -66,48 +57,49 @@ namespace PokemonProofOrganizer
 
         private void RenameChecked(object sender, RoutedEventArgs e)
         {
-            renameChecked = true;
+            options.Rename = true;
         }
 
         private void RenameUnchecked(object sender, RoutedEventArgs e)
         {
-            renameChecked = false;
+            options.Rename = false;
         }
 
         private void CreateFolderChecked(object sender, RoutedEventArgs e)
         {
-            createFolderChecked = true;
+            options.CreateFolder = true;
         }
 
         private void CreateFolderUnchecked(object sender, RoutedEventArgs e)
         {
-            createFolderChecked = false;
+            options.CreateFolder = false;
         }
 
         private void AddTradeHistoryChecked(object sender, RoutedEventArgs e)
         {
-            addTradeHistoryChecked = true;
+            options.AddTradeHistory = true;
         }
 
         private void AddTradeHistoryUnchecked(object sender, RoutedEventArgs e)
         {
-            addTradeHistoryChecked = false;
+            options.AddTradeHistory = false;
         }
 
         private void CompressChecked(object sender, RoutedEventArgs e)
         {
-            compressChecked = true;
+            options.Compress = true;
         }
 
         private void CompressUnchecked(object sender, RoutedEventArgs e)
         {
-            compressChecked = false;
+            options.Compress = false;
         }
 
         private void PathAdded(object sender, TextChangedEventArgs e)
         {
             
         }
+        
         private void TernaryNumberChanged(object sender, TextChangedEventArgs e)
         {
             int value;
@@ -121,15 +113,14 @@ namespace PokemonProofOrganizer
         {
             if (queue != null && queue.Count > 0)
             {
-                if (renameChecked || createFolderChecked || addTradeHistoryChecked || compressChecked)
+                if (options.Rename || options.CreateFolder || options.AddTradeHistory || options.Compress)
                 {
                     Start.IsEnabled = false;
                     string prefix = Prefix.Text;
-                    Tools tools = new Tools(queue, renameChecked, createFolderChecked, addTradeHistoryChecked, compressChecked, this);
+                    Tools tools = new Tools(queue, options, this); ;
 
-                    await Task.Run(() => tools.runTools(filePaths, prefix, ternary, tradeHistory, resetEvent, threadStartedEvent));
+                    await Task.Run(() => tools.runTools(resetEvent, threadStartedEvent));
 
-                    queue = new BlockingCollection<string>();
                     filePaths = new List<string>();
                     progressBar.Value = 0;
                     progressLabel.Content = "0.00%";
@@ -143,7 +134,7 @@ namespace PokemonProofOrganizer
             }
             else
             {
-                MessageBox.Show("Select one or more files!");
+                MessageBox.Show("Add Jobs to the Queue!");
             }
         }
 
@@ -171,9 +162,11 @@ namespace PokemonProofOrganizer
 
         private void AddToQueueClick(object sender, RoutedEventArgs e)
         {
-            foreach (string item in filePaths)
+            foreach (string path in filePaths)
             {
-                queue.Add(item);
+                Job job = new Job(path, options, tradeHistory, ternary, Prefix.Text);
+                queue.Add(job);
+                ternary++;
             }
         }
 

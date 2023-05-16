@@ -8,48 +8,38 @@ using System.Management;
 using System.Security.Cryptography;
 using System.CodeDom;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Linq;
-using System.Windows.Documents;
 
 namespace PokemonProofOrganizer
 {
     internal class Tools
     {
-        private BlockingCollection<string> queue;
-        private static bool rename = false;
-        private static bool create = false;
-        private static bool addTradeHistory = false;
-        private static bool compress = false;
+        private BlockingCollection<Job> queue;
+        private Options options;
         private static bool compressSuccess = false;
         private MainWindow mainWindow;
 
-        public Tools(BlockingCollection<string> queue, bool renameChecked, bool createFolderChecked, bool addTradeHistoryChecked, 
-            bool compressChecked, MainWindow mainWindow)
+        public Tools(BlockingCollection<Job> queue, Options options, MainWindow mainWindow)
         {
             this.queue = queue;
-            rename = renameChecked;
-            create = createFolderChecked;
-            addTradeHistory = addTradeHistoryChecked;
-            compress = compressChecked;
+            this.options = options;
             this.mainWindow = mainWindow;
         }
 
-        public void runTools(List<string> filePaths, string prefix, int ternary, string fileContent, ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
+        public void runTools(ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
         {
-            int currentNumber = ternary, fileCounter = 0, queueCount = queue.Count;
+            int fileCounter = 0, queueCount = queue.Count;
             string fileName = "";
             string newfilePath = "";
             string directoryPath = "";
 
 
-            foreach (string filePath in queue.GetConsumingEnumerable())
+            foreach (Job job in queue.GetConsumingEnumerable())
             {
-                fileName = Path.GetFileName(filePath);
-                newfilePath = filePath;
+                fileName = Path.GetFileName(job.FilePath);
+                newfilePath = job.FilePath;
 
-                if (compress)
+                if (job.Options.Compress)
                 {
                     fileCounter++;
 
@@ -58,19 +48,19 @@ namespace PokemonProofOrganizer
                         mainWindow.Files.Content = $"File: {fileCounter}/{queueCount}";
                     });
 
-                    if (rename)
+                    if (job.Options.Rename)
                     {
-                        fileName = $"{prefix}{DecimalToTernary(ternary).ToString().PadLeft(4, '0')}.mp4";
-                        newfilePath = renameFiles(filePath, fileName);
+                        fileName = $"{job.Prefix}{DecimalToTernary(job.Ternary).ToString().PadLeft(4, '0')}.mp4";
+                        newfilePath = renameFiles(job.FilePath, fileName);
                     }
 
-                    if (!create)
+                    if (!job.Options.CreateFolder)
                     {
-                        directoryPath = createFolder(Path.GetDirectoryName(filePath), "output");
+                        directoryPath = createFolder(Path.GetDirectoryName(job.FilePath), "output");
                     }
                     else
                     {
-                        directoryPath = createFolder(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(fileName));
+                        directoryPath = createFolder(Path.GetDirectoryName(job.FilePath), Path.GetFileNameWithoutExtension(fileName));
                     }
 
                     compressSuccess = true;
@@ -82,30 +72,30 @@ namespace PokemonProofOrganizer
                         break;
                     }
 
-                    if (addTradeHistory)
+                    if (job.Options.AddTradeHistory)
                     {
-                        createTradeHistory(fileContent, directoryPath);
+                        createTradeHistory(job.TradeHistory, directoryPath);
                     }
                 }
                 else
                 {
-                    if (rename)
+                    if (job.Options.Rename)
                     {
-                        fileName = $"{prefix}{DecimalToTernary(ternary).ToString().PadLeft(4, '0')}.mp4";
-                        newfilePath = renameFiles(filePath, fileName);
+                        fileName = $"{job.Prefix} {DecimalToTernary(job.Ternary).ToString().PadLeft(4, '0')}.mp4";
+                        newfilePath = renameFiles(job.FilePath, fileName);
                     }
 
                     if (newfilePath != "")
                     {
-                        if (create)
+                        if (job.Options.CreateFolder)
                         {
                             directoryPath = createFolderAndMove(newfilePath);
                         }
 
-                        if (addTradeHistory)
+                        if (job.Options.AddTradeHistory)
                         {
                             Debug.WriteLine("hi");
-                            createTradeHistory(fileContent, directoryPath);
+                            createTradeHistory(job.TradeHistory, directoryPath);
                         }
                     }
                     else
@@ -113,7 +103,7 @@ namespace PokemonProofOrganizer
                         MessageBox.Show("File already exists");
                     }
                 }
-                ternary++;
+
                 if(queue.Count == 0)
                 {
                     MessageBox.Show("Queue finished!");
