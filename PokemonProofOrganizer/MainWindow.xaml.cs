@@ -117,7 +117,7 @@ namespace PokemonProofOrganizer
                 {
                     Start.IsEnabled = false;
                     string prefix = Prefix.Text;
-                    Tools tools = new Tools(queue, options, this); ;
+                    Tools tools = new Tools(queue, this); ;
 
                     await Task.Run(() => tools.runTools(resetEvent, threadStartedEvent));
 

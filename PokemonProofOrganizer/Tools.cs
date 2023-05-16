@@ -1,12 +1,8 @@
 ﻿using System.Diagnostics;
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Threading;
-using System.Management;
-using System.Security.Cryptography;
-using System.CodeDom;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
@@ -15,14 +11,12 @@ namespace PokemonProofOrganizer
     internal class Tools
     {
         private BlockingCollection<Job> queue;
-        private Options options;
         private static bool compressSuccess = false;
         private MainWindow mainWindow;
 
-        public Tools(BlockingCollection<Job> queue, Options options, MainWindow mainWindow)
+        public Tools(BlockingCollection<Job> queue, MainWindow mainWindow)
         {
             this.queue = queue;
-            this.options = options;
             this.mainWindow = mainWindow;
         }
 
