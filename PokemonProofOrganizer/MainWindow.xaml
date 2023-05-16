@@ -27,6 +27,5 @@
         <Label Content="Prefix" HorizontalAlignment="Left" Margin="55,138,0,0" VerticalAlignment="Top" Width="140"/>
         <TextBox x:Name="Prefix" Text="12" HorizontalAlignment="Left" Margin="195,144,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="TernaryNumberChanged" Height="20" BorderThickness="1,1,1,1" TextAlignment="Right"/>
         <Button x:Name="AddToQueue" Content="Add to Queue" HorizontalAlignment="Left" Margin="455,224,0,0" VerticalAlignment="Top" Width="100" Click="AddToQueueClick" />
-        <Button x:Name="Queue" Content="View Queue" HorizontalAlignment="Left" Margin="335,224,0,0" VerticalAlignment="Top" Width="100" Click="ViewQueue"/>
     </Grid>
 </Window>

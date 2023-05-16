@@ -18,7 +18,6 @@ namespace PokemonProofOrganizer
         private BlockingCollection<Job> queue;
         private List<string> filePaths;
         private ManualResetEvent resetEvent;
-        private ManualResetEvent threadStartedEvent = new ManualResetEvent(false);
         private Options options;
         private int ternary;
         private string tradeHistory;
@@ -117,9 +116,9 @@ namespace PokemonProofOrganizer
                 {
                     Start.IsEnabled = false;
                     string prefix = Prefix.Text;
-                    Tools tools = new Tools(queue, this); ;
+                    Tools tools = new Tools(queue, this);
 
-                    await Task.Run(() => tools.runTools(resetEvent, threadStartedEvent));
+                    await Task.Run(() => tools.runTools(resetEvent));
 
                     filePaths = new List<string>();
                     progressBar.Value = 0;
@@ -152,7 +151,6 @@ namespace PokemonProofOrganizer
                 // Retrieve data from the new window
                 tradeHistory = th.Content;
             };
-            
         }
 
         private void CancelAll_Click(object sender, RoutedEventArgs e)
@@ -168,11 +166,6 @@ namespace PokemonProofOrganizer
                 queue.Add(job);
                 ternary++;
             }
-        }
-
-        private void ViewQueue(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

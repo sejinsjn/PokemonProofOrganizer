@@ -20,7 +20,7 @@ namespace PokemonProofOrganizer
             this.mainWindow = mainWindow;
         }
 
-        public void runTools(ManualResetEvent resetEvent, ManualResetEvent threadStartedEvent)
+        public void runTools(ManualResetEvent resetEvent)
         {
             int fileCounter = 0, queueCount = queue.Count;
             string fileName = "";
