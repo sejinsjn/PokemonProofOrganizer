@@ -75,7 +75,7 @@ namespace PokemonProofOrganizer
                 {
                     if (job.Options.Rename)
                     {
-                        fileName = $"{job.Prefix} {DecimalToTernary(job.Ternary).ToString().PadLeft(4, '0')}.mp4";
+                        fileName = $"{job.Prefix}{DecimalToTernary(job.Ternary).ToString().PadLeft(4, '0')}.mp4";
                         newfilePath = renameFiles(job.FilePath, fileName);
                     }
 
